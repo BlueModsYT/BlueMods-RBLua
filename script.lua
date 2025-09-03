@@ -1,199 +1,220 @@
--- // Services
+-- // BlueMods Roblox GUI // --
+-- Put this in LocalScript (StarterGui)
+
+-- Services
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
-
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 
--- // ScreenGui Setup
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "BlueModsUI"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = player:WaitForChild("PlayerGui")
+-- ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Main Frame (ScrollingFrame)
-local mainFrame = Instance.new("ScrollingFrame")
-mainFrame.Size = UDim2.new(0, 300, 0, 260)
-mainFrame.AnchorPoint = Vector2.new(0.5, 0)
-mainFrame.Position = UDim2.new(0.5, 0, 0, 50) -- Center top
-mainFrame.CanvasSize = UDim2.new(0, 0, 0, 450) -- enough scroll space
-mainFrame.ScrollBarThickness = 6
-mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-mainFrame.BackgroundTransparency = 0.4
-mainFrame.Visible = true
-mainFrame.Parent = screenGui
+-- Main Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 300, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -150, 0, 50) -- Center top
+MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+MainFrame.BackgroundTransparency = 0.4
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
 
--- Title
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(0, 200, 0, 30)
-title.Position = UDim2.new(0, 40, 0, 0) -- beside logo
-title.Text = "BlueMods"
-title.TextColor3 = Color3.fromRGB(0, 170, 255)
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.TextScaled = true
-title.BackgroundTransparency = 1
-title.Parent = mainFrame
+-- Title Bar
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+TitleBar.BackgroundTransparency = 0.3
+TitleBar.Parent = MainFrame
 
 -- Logo
-local logo = Instance.new("ImageLabel")
-logo.Size = UDim2.new(0, 30, 0, 30)
-logo.Position = UDim2.new(0, 5, 0, 0)
-logo.BackgroundTransparency = 1
-logo.Image = "https://bluemods.neocities.org/p/ic_blue.png"
-logo.Parent = mainFrame
+local Logo = Instance.new("ImageLabel")
+Logo.Size = UDim2.new(0, 30, 0, 30)
+Logo.Position = UDim2.new(0, 5, 0, 5)
+Logo.BackgroundTransparency = 1
+Logo.Image = "https://bluemods.neocities.org/p/ic_blue.png"
+Logo.Parent = TitleBar
+
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -80, 1, 0)
+Title.Position = UDim2.new(0, 40, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "BlueMods"
+Title.TextColor3 = Color3.fromRGB(0, 170, 255)
+Title.TextSize = 24
+Title.Font = Enum.Font.SourceSansBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = TitleBar
 
 -- Close Button
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 60, 0, 30)
-closeBtn.Position = UDim2.new(1, -65, 0, 5)
-closeBtn.Text = "Close"
-closeBtn.TextColor3 = Color3.new(1, 1, 1)
-closeBtn.Parent = mainFrame
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 60, 1, 0)
+CloseBtn.Position = UDim2.new(1, -60, 0, 0)
+CloseBtn.Text = "Close"
+CloseBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+CloseBtn.Parent = TitleBar
 
--- Reopen Button
-local reopenBtn = Instance.new("TextButton")
-reopenBtn.Size = UDim2.new(0, 120, 0, 30)
-reopenBtn.Position = UDim2.new(0, 10, 0, 10)
-reopenBtn.Text = "Open BlueMods"
-reopenBtn.TextColor3 = Color3.new(1, 1, 1)
-reopenBtn.Visible = false
-reopenBtn.Parent = screenGui
+-- Reopen Button (hidden at first)
+local ReopenBtn = Instance.new("TextButton")
+ReopenBtn.Size = UDim2.new(0, 120, 0, 40)
+ReopenBtn.Position = UDim2.new(0.5, -60, 0, 50)
+ReopenBtn.Text = "Open BlueMods"
+ReopenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ReopenBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ReopenBtn.BackgroundTransparency = 0.4
+ReopenBtn.Visible = false
+ReopenBtn.Parent = ScreenGui
 
--- Variables
-local infiniteJump = false
-local jumpBoostOn = false
-local jumpBoostValue = 50
-local speedBoostOn = false
-local speedBoostValue = 30
+-- Scrollable container
+local ScrollFrame = Instance.new("ScrollingFrame")
+ScrollFrame.Size = UDim2.new(1, -20, 1, -50)
+ScrollFrame.Position = UDim2.new(0, 10, 0, 45)
+ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 500)
+ScrollFrame.ScrollBarThickness = 8
+ScrollFrame.BackgroundTransparency = 1
+ScrollFrame.Parent = MainFrame
+
+-- UIListLayout for buttons
+local UIListLayout = Instance.new("UIListLayout")
+UIListLayout.Padding = UDim.new(0, 5)
+UIListLayout.Parent = ScrollFrame
+
+-- Utility: Create button
+local function CreateButton(name)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -10, 0, 40)
+    btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 18
+    btn.Text = name
+    btn.Parent = ScrollFrame
+    return btn
+end
+
+-- Utility: Create slider
+local function CreateSlider(name, min, max, default)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, -10, 0, 50)
+    frame.BackgroundTransparency = 1
+    frame.Parent = ScrollFrame
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 0.5, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.Font = Enum.Font.SourceSans
+    label.TextSize = 18
+    label.Text = name .. ": " .. tostring(default)
+    label.Parent = frame
+
+    local slider = Instance.new("TextButton")
+    slider.Size = UDim2.new(1, 0, 0.5, 0)
+    slider.Position = UDim2.new(0, 0, 0.5, 0)
+    slider.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    slider.Text = ""
+    slider.Parent = frame
+
+    local amount = default
+    local dragging = false
+
+    slider.MouseButton1Down:Connect(function()
+        dragging = true
+    end)
+    UIS.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+
+    UIS.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local rel = math.clamp((input.Position.X - slider.AbsolutePosition.X) / slider.AbsoluteSize.X, 0, 1)
+            amount = math.floor(min + (max - min) * rel)
+            label.Text = name .. ": " .. tostring(amount)
+        end
+    end)
+
+    return function() return amount end, label
+end
+
+-- Features
+local infJump = false
+local jumpBoost = false
+local speedBoost = false
 local invisible = false
 
--- Infinite Jump Toggle
-local infJumpBtn = Instance.new("TextButton")
-infJumpBtn.Size = UDim2.new(1, -20, 0, 30)
-infJumpBtn.Position = UDim2.new(0, 10, 0, 40)
-infJumpBtn.Text = "Infinite Jump: OFF"
-infJumpBtn.TextColor3 = Color3.new(1, 1, 1)
-infJumpBtn.Parent = mainFrame
+-- Buttons & sliders
+local InfJumpBtn = CreateButton("Infinite Jump: OFF")
+local JumpBoostBtn = CreateButton("Jump Boost: OFF")
+local GetJumpAmount, JumpLabel = CreateSlider("JumpPower", 50, 200, 120)
 
--- Jump Boost Toggle
-local jumpBoostBtn = Instance.new("TextButton")
-jumpBoostBtn.Size = UDim2.new(1, -20, 0, 30)
-jumpBoostBtn.Position = UDim2.new(0, 10, 0, 80)
-jumpBoostBtn.Text = "Jump Boost: OFF"
-jumpBoostBtn.TextColor3 = Color3.new(1, 1, 1)
-jumpBoostBtn.Parent = mainFrame
+local SpeedBoostBtn = CreateButton("Speed Boost: OFF")
+local GetSpeedAmount, SpeedLabel = CreateSlider("WalkSpeed", 16, 100, 50)
 
--- Jump Boost Slider
-local jumpSlider = Instance.new("TextButton")
-jumpSlider.Size = UDim2.new(1, -20, 0, 20)
-jumpSlider.Position = UDim2.new(0, 10, 0, 115)
-jumpSlider.Text = "JumpPower: 50"
-jumpSlider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-jumpSlider.TextColor3 = Color3.new(1, 1, 1)
-jumpSlider.Parent = mainFrame
+local InvisBtn = CreateButton("Invisible: OFF")
 
--- Speed Boost Toggle
-local speedBoostBtn = Instance.new("TextButton")
-speedBoostBtn.Size = UDim2.new(1, -20, 0, 30)
-speedBoostBtn.Position = UDim2.new(0, 10, 0, 150)
-speedBoostBtn.Text = "Speed Boost: OFF"
-speedBoostBtn.TextColor3 = Color3.new(1, 1, 1)
-speedBoostBtn.Parent = mainFrame
-
--- Speed Boost Slider
-local speedSlider = Instance.new("TextButton")
-speedSlider.Size = UDim2.new(1, -20, 0, 20)
-speedSlider.Position = UDim2.new(0, 10, 0, 185)
-speedSlider.Text = "WalkSpeed: 30"
-speedSlider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-speedSlider.TextColor3 = Color3.new(1, 1, 1)
-speedSlider.Parent = mainFrame
-
--- Invisible Toggle
-local invisBtn = Instance.new("TextButton")
-invisBtn.Size = UDim2.new(1, -20, 0, 30)
-invisBtn.Position = UDim2.new(0, 10, 0, 220)
-invisBtn.Text = "Invisible: OFF"
-invisBtn.TextColor3 = Color3.new(1, 1, 1)
-invisBtn.Parent = mainFrame
-
--- Logic
+-- Infinite Jump loop
 UIS.JumpRequest:Connect(function()
-	if infiniteJump then
-		humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-	end
+    if infJump and humanoid then
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
 end)
 
-infJumpBtn.MouseButton1Click:Connect(function()
-	infiniteJump = not infiniteJump
-	infJumpBtn.Text = "Infinite Jump: " .. (infiniteJump and "ON" or "OFF")
+-- Toggles
+InfJumpBtn.MouseButton1Click:Connect(function()
+    infJump = not infJump
+    InfJumpBtn.Text = "Infinite Jump: " .. (infJump and "ON" or "OFF")
 end)
 
-jumpBoostBtn.MouseButton1Click:Connect(function()
-	jumpBoostOn = not jumpBoostOn
-	if jumpBoostOn then
-		humanoid.UseJumpPower = true
-		humanoid.JumpPower = jumpBoostValue
-	else
-		humanoid.JumpPower = 50
-	end
-	jumpBoostBtn.Text = "Jump Boost: " .. (jumpBoostOn and "ON" or "OFF")
+JumpBoostBtn.MouseButton1Click:Connect(function()
+    jumpBoost = not jumpBoost
+    JumpBoostBtn.Text = "Jump Boost: " .. (jumpBoost and "ON" or "OFF")
+    if not jumpBoost then
+        humanoid.UseJumpPower = true
+        humanoid.JumpPower = 50
+    end
 end)
 
-jumpSlider.MouseButton1Click:Connect(function()
-	jumpBoostValue = jumpBoostValue + 10
-	if jumpBoostValue > 150 then jumpBoostValue = 20 end
-	jumpSlider.Text = "JumpPower: " .. jumpBoostValue
-	if jumpBoostOn then
-		humanoid.JumpPower = jumpBoostValue
-	end
+SpeedBoostBtn.MouseButton1Click:Connect(function()
+    speedBoost = not speedBoost
+    SpeedBoostBtn.Text = "Speed Boost: " .. (speedBoost and "ON" or "OFF")
+    if not speedBoost then
+        humanoid.WalkSpeed = 16
+    end
 end)
 
-speedBoostBtn.MouseButton1Click:Connect(function()
-	speedBoostOn = not speedBoostOn
-	if speedBoostOn then
-		humanoid.WalkSpeed = speedBoostValue
-	else
-		humanoid.WalkSpeed = 16
-	end
-	speedBoostBtn.Text = "Speed Boost: " .. (speedBoostOn and "ON" or "OFF")
+InvisBtn.MouseButton1Click:Connect(function()
+    invisible = not invisible
+    InvisBtn.Text = "Invisible: " .. (invisible and "ON" or "OFF")
+    for _, part in pairs(character:GetDescendants()) do
+        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+            part.Transparency = invisible and 1 or 0
+        end
+    end
 end)
 
-speedSlider.MouseButton1Click:Connect(function()
-	speedBoostValue = speedBoostValue + 5
-	if speedBoostValue > 100 then speedBoostValue = 16 end
-	speedSlider.Text = "WalkSpeed: " .. speedBoostValue
-	if speedBoostOn then
-		humanoid.WalkSpeed = speedBoostValue
-	end
+-- Loops for boosts
+game:GetService("RunService").RenderStepped:Connect(function()
+    if jumpBoost then
+        humanoid.UseJumpPower = true
+        humanoid.JumpPower = GetJumpAmount()
+    end
+    if speedBoost then
+        humanoid.WalkSpeed = GetSpeedAmount()
+    end
 end)
 
-invisBtn.MouseButton1Click:Connect(function()
-	invisible = not invisible
-	if invisible then
-		for _, part in ipairs(character:GetDescendants()) do
-			if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-				part.Transparency = 1
-			end
-		end
-	else
-		for _, part in ipairs(character:GetDescendants()) do
-			if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-				part.Transparency = 0
-			end
-		end
-	end
-	invisBtn.Text = "Invisible: " .. (invisible and "ON" or "OFF")
+-- Close / Reopen logic
+CloseBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
+    ReopenBtn.Visible = true
 end)
-
--- Close / Reopen
-closeBtn.MouseButton1Click:Connect(function()
-	mainFrame.Visible = false
-	reopenBtn.Visible = true
-end)
-
-reopenBtn.MouseButton1Click:Connect(function()
-	mainFrame.Visible = true
-	reopenBtn.Visible = false
+ReopenBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = true
+    ReopenBtn.Visible = false
 end)
