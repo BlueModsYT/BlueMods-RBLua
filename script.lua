@@ -1,7 +1,6 @@
 -- // Services
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -13,10 +12,13 @@ screenGui.Name = "BlueModsUI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Main Frame
-local mainFrame = Instance.new("Frame")
+-- Main Frame (ScrollingFrame)
+local mainFrame = Instance.new("ScrollingFrame")
 mainFrame.Size = UDim2.new(0, 300, 0, 260)
-mainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
+mainFrame.AnchorPoint = Vector2.new(0.5, 0)
+mainFrame.Position = UDim2.new(0.5, 0, 0, 50) -- Center top
+mainFrame.CanvasSize = UDim2.new(0, 0, 0, 450) -- enough scroll space
+mainFrame.ScrollBarThickness = 6
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 mainFrame.BackgroundTransparency = 0.4
 mainFrame.Visible = true
@@ -24,10 +26,11 @@ mainFrame.Parent = screenGui
 
 -- Title
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -40, 0, 30)
-title.Position = UDim2.new(0, 40, 0, 0)
+title.Size = UDim2.new(0, 200, 0, 30)
+title.Position = UDim2.new(0, 40, 0, 0) -- beside logo
 title.Text = "BlueMods"
 title.TextColor3 = Color3.fromRGB(0, 170, 255)
+title.TextXAlignment = Enum.TextXAlignment.Left
 title.TextScaled = true
 title.BackgroundTransparency = 1
 title.Parent = mainFrame
@@ -45,6 +48,7 @@ local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 60, 0, 30)
 closeBtn.Position = UDim2.new(1, -65, 0, 5)
 closeBtn.Text = "Close"
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
 closeBtn.Parent = mainFrame
 
 -- Reopen Button
@@ -52,10 +56,11 @@ local reopenBtn = Instance.new("TextButton")
 reopenBtn.Size = UDim2.new(0, 120, 0, 30)
 reopenBtn.Position = UDim2.new(0, 10, 0, 10)
 reopenBtn.Text = "Open BlueMods"
+reopenBtn.TextColor3 = Color3.new(1, 1, 1)
 reopenBtn.Visible = false
 reopenBtn.Parent = screenGui
 
--- Functions
+-- Variables
 local infiniteJump = false
 local jumpBoostOn = false
 local jumpBoostValue = 50
@@ -63,12 +68,12 @@ local speedBoostOn = false
 local speedBoostValue = 30
 local invisible = false
 
--- UI Elements
 -- Infinite Jump Toggle
 local infJumpBtn = Instance.new("TextButton")
 infJumpBtn.Size = UDim2.new(1, -20, 0, 30)
 infJumpBtn.Position = UDim2.new(0, 10, 0, 40)
 infJumpBtn.Text = "Infinite Jump: OFF"
+infJumpBtn.TextColor3 = Color3.new(1, 1, 1)
 infJumpBtn.Parent = mainFrame
 
 -- Jump Boost Toggle
@@ -76,6 +81,7 @@ local jumpBoostBtn = Instance.new("TextButton")
 jumpBoostBtn.Size = UDim2.new(1, -20, 0, 30)
 jumpBoostBtn.Position = UDim2.new(0, 10, 0, 80)
 jumpBoostBtn.Text = "Jump Boost: OFF"
+jumpBoostBtn.TextColor3 = Color3.new(1, 1, 1)
 jumpBoostBtn.Parent = mainFrame
 
 -- Jump Boost Slider
@@ -92,6 +98,7 @@ local speedBoostBtn = Instance.new("TextButton")
 speedBoostBtn.Size = UDim2.new(1, -20, 0, 30)
 speedBoostBtn.Position = UDim2.new(0, 10, 0, 150)
 speedBoostBtn.Text = "Speed Boost: OFF"
+speedBoostBtn.TextColor3 = Color3.new(1, 1, 1)
 speedBoostBtn.Parent = mainFrame
 
 -- Speed Boost Slider
@@ -108,10 +115,10 @@ local invisBtn = Instance.new("TextButton")
 invisBtn.Size = UDim2.new(1, -20, 0, 30)
 invisBtn.Position = UDim2.new(0, 10, 0, 220)
 invisBtn.Text = "Invisible: OFF"
+invisBtn.TextColor3 = Color3.new(1, 1, 1)
 invisBtn.Parent = mainFrame
 
 -- Logic
--- Infinite Jump
 UIS.JumpRequest:Connect(function()
 	if infiniteJump then
 		humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
@@ -123,7 +130,6 @@ infJumpBtn.MouseButton1Click:Connect(function()
 	infJumpBtn.Text = "Infinite Jump: " .. (infiniteJump and "ON" or "OFF")
 end)
 
--- Jump Boost
 jumpBoostBtn.MouseButton1Click:Connect(function()
 	jumpBoostOn = not jumpBoostOn
 	if jumpBoostOn then
@@ -144,7 +150,6 @@ jumpSlider.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Speed Boost
 speedBoostBtn.MouseButton1Click:Connect(function()
 	speedBoostOn = not speedBoostOn
 	if speedBoostOn then
@@ -164,7 +169,6 @@ speedSlider.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Invisible
 invisBtn.MouseButton1Click:Connect(function()
 	invisible = not invisible
 	if invisible then
